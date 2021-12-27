@@ -6,6 +6,7 @@ import (
 	"github.com/gorilla/websocket"
 	"log"
 	"net/http"
+	"path"
 	"sync"
 )
 
@@ -21,8 +22,8 @@ func main() {
 	flag.Parse()
 	log.SetFlags(0)
 	http.HandleFunc("/ws", wsEndpoint)
-	http.HandleFunc("/client/", func(w http.ResponseWriter, r *http.Request) {
-		http.ServeFile(w, r, r.URL.Path[1:])
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, path.Join("./client/", r.URL.Path))
 	})
 	upgrader.CheckOrigin = func(r *http.Request) bool { return true }
 	log.Fatal(http.ListenAndServe(*addr, nil))

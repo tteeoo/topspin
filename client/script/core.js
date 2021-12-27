@@ -1,6 +1,6 @@
 // Initialize the game.
 function init() {
-	p1 = new player(30, 30, "red", 100, 100);
+	p1 = new player(30, 30, "black", 100, 100);
 	window.addEventListener("keydown", this.onKeyDown, false);
 	window.addEventListener("keyup", this.onKeyUp, false);
 	area.init();

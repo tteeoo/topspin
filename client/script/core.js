@@ -35,6 +35,8 @@ var area = {
 		this.canvas.width = document.body.clientWidth;
 		this.canvas.height = document.body.clientHeight;
 		this.context = this.canvas.getContext("2d");
+		this.context.font = "12px Arial";
+		this.context.textAlign = "center";
 		this.interval = setInterval(update, 15);
 		document.body.insertBefore(this.canvas, document.body.childNodes[0]);
 	},
@@ -64,6 +66,7 @@ function updatePlayer(player) {
 
 	ctx.save();
 	ctx.translate(player.x, player.y);
+	ctx.fillText("Hello World", 0, -player.height)
 	ctx.rotate(player.rotation);
 	ctx.fillStyle = player.color;
 	ctx.fillRect(-player.width/2, -player.height/2, player.width, player.height);

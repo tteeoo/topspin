@@ -20,8 +20,10 @@ function update() {
 	}
 
 	area.clear();
-	for (var i = 0; i < players.length; i++) {
-		updatePlayer(players[i]);
+	if (players) {
+		for (var i = 0; i < players.length; i++) {
+			updatePlayer(players[i]);
+		}
 	}
 	updatePlayer(p1);
 }
@@ -36,7 +38,7 @@ var area = {
 		this.interval = setInterval(update, 15);
 		document.body.insertBefore(this.canvas, document.body.childNodes[0]);
 	},
-	clear : function() {
+	clear: function() {
 		this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
 	}
 } 
@@ -50,6 +52,8 @@ function player(width, height, color, x, y) {
 	this.color = color
 	this.speedX = 0;
 	this.speedY = 0;
+	this.rotation = 0;
+	this.angvel = Math.PI / 16;
 }
 
 // Advance and draw the given player.
@@ -57,8 +61,18 @@ function updatePlayer(player) {
 	player.x += player.speedX * 4;
 	player.y += player.speedY * 4;
 	ctx = area.context;
+
+	ctx.save();
+	ctx.translate(player.x, player.y);
+	ctx.rotate(player.rotation);
 	ctx.fillStyle = player.color;
-	ctx.fillRect(player.x, player.y, player.width, player.height);
+	ctx.fillRect(-player.width/2, -player.height/2, player.width, player.height);
+	ctx.restore();
+
+	player.rotation += player.angvel;
+	if (player.rotation > Math.PI * 2) {
+		player.rotation = player.rotation - Math.PI * 2;
+	}
 }
 
 // Open WebSocket, start game.

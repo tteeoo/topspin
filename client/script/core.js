@@ -1,3 +1,10 @@
+var ws;
+var players = [];
+var p1;
+var server;
+var name;
+var color;
+
 // Run every 15 ms: send player data, draw other players. 
 function update() {
 	ws.send(JSON.stringify(p1));
@@ -57,7 +64,7 @@ function updatePlayer(player) {
 
 	ctx.save();
 	ctx.translate(player.x, player.y);
-	ctx.fillText("Hello World", 0, -player.height)
+	ctx.fillText(name, 0, -player.height)
 	ctx.rotate(player.rotation);
 	ctx.fillStyle = player.color;
 	ctx.fillRect(-player.width/2, -player.height/2, player.width, player.height);
@@ -70,11 +77,8 @@ function updatePlayer(player) {
 }
 
 // Open WebSocket, start game.
-var ws;
-var players = [];
-var p1;
-function connect(host) {
-	ws = new WebSocket("ws://"+host+"/ws", []);
+function connect() {
+	ws = new WebSocket("ws://"+server+"/ws", []);
 
 	ws.onopen = function (event) {
 		// show/hide
@@ -85,7 +89,7 @@ function connect(host) {
 			x.style.display = "none";
 		}
 
-		p1 = new player(30, 30, "black", 100, 100);
+		p1 = new player(30, 30, color, 100, 100);
 		window.addEventListener("keydown", onKeyDown, false);
 		window.addEventListener("keyup", onKeyUp, false);
 		area.init();
@@ -98,17 +102,17 @@ function connect(host) {
 
 function join() {
 	var inputs = document.getElementsByClassName("joinInput");
-	var server = inputs[0].value;
+	server = inputs[0].value;
 	if (server == "") {
 		server = "mc.theohenson.com:8080";
 	}
-	var name = inputs[1].value;
+	name = inputs[1].value;
 	if (name == "") {
 		name = "Player";
 	}
-	var color = inputs[2].value;
+	color = inputs[2].value;
 	if (color == "") {
 		color = "black";
 	}
-	connect(server);
+	connect();
 }

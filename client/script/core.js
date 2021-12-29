@@ -1,12 +1,3 @@
-// Initialize the game.
-function init() {
-	p1 = new player(30, 30, "black", 100, 100);
-	window.addEventListener("keydown", this.onKeyDown, false);
-	window.addEventListener("keyup", this.onKeyUp, false);
-	area.init();
-	players = [];
-}
-
 // Run every 15 ms: send player data, draw other players. 
 function update() {
 	ws.send(JSON.stringify(p1));
@@ -79,10 +70,45 @@ function updatePlayer(player) {
 }
 
 // Open WebSocket, start game.
-var ws = new WebSocket("ws://localhost:8080/ws", []);
-ws.onmessage = function (event) {
-	players = JSON.parse(event.data);
+var ws;
+var players = [];
+var p1;
+function connect(host) {
+	ws = new WebSocket("ws://"+host+"/ws", []);
+
+	ws.onopen = function (event) {
+		// show/hide
+		area.canvas.style.display = "block";
+		area.canvas.height = document.body.clientHeight;
+		area.canvas.width = document.body.clientWidth;
+		for (let x of document.getElementsByClassName("toHide")) {
+			x.style.display = "none";
+		}
+
+		p1 = new player(30, 30, "black", 100, 100);
+		window.addEventListener("keydown", onKeyDown, false);
+		window.addEventListener("keyup", onKeyUp, false);
+		area.init();
+	}
+
+	ws.onmessage = function (event) {
+		players = JSON.parse(event.data);
+	}
 }
-ws.onopen = function (event) {
-	init();
+
+function join() {
+	var inputs = document.getElementsByClassName("joinInput");
+	var server = inputs[0].value;
+	if (server == "") {
+		server = "mc.theohenson.com:8080";
+	}
+	var name = inputs[1].value;
+	if (name == "") {
+		name = "Player";
+	}
+	var color = inputs[2].value;
+	if (color == "") {
+		color = "black";
+	}
+	connect(server);
 }

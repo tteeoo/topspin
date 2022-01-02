@@ -1,6 +1,6 @@
-package main
+package game
 
-type player struct {
+type Player struct {
 	id string
 	color string
 	pos [2]float64
@@ -9,6 +9,6 @@ type player struct {
 	mass float64
 }
 
-func (p player) angMom() float64 {
+func (p Player) angMom() float64 {
 	return p.angVel * p.mass
 }

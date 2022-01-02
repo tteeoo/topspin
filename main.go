@@ -3,18 +3,20 @@ package main
 import (
 	"encoding/json"
 	"flag"
-	"github.com/gorilla/websocket"
 	"log"
 	"net/http"
 	"path"
 	"sync"
+
+	"github.com/gorilla/websocket"
+	"github.com/tteeoo/topspin/packet"
 )
 
 var addr = flag.String("addr", ":8080", "server address")
 
 var upgrader = websocket.Upgrader{}
 
-var players = map[string]packet{}
+var players = map[string]packet.Packet{}
 
 var mutex = &sync.Mutex{}
 

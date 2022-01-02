@@ -14,7 +14,7 @@ var addr = flag.String("addr", ":8080", "server address")
 
 var upgrader = websocket.Upgrader{}
 
-var players = map[string]any{}
+var players = map[string]packet{}
 
 var mutex = &sync.Mutex{}
 
@@ -44,7 +44,7 @@ func wsEndpoint(w http.ResponseWriter, r *http.Request) {
 			break
 		}
 
-		var parsed any
+		var parsed packet
 		err = json.Unmarshal(message, &parsed)
 		if err != nil {
 			log.Println("json:", err)
@@ -54,7 +54,7 @@ func wsEndpoint(w http.ResponseWriter, r *http.Request) {
 		mutex.Lock()
 		players[id] = parsed
 		log.Printf("recv: %s", players)
-		var sending []any
+		var sending []packet
 		for v, player := range players {
 			if v != id {
 				sending = append(sending, player)

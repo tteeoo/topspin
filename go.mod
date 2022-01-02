@@ -1,4 +1,4 @@
-module topspin
+module github.com/tteeoo/topspin
 
 go 1.17
 

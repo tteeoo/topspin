@@ -46,7 +46,7 @@ func wsEndpoint(w http.ResponseWriter, r *http.Request) {
 			break
 		}
 
-		var parsed packet
+		var parsed packet.Packet
 		err = json.Unmarshal(message, &parsed)
 		if err != nil {
 			log.Println("json:", err)
@@ -56,7 +56,7 @@ func wsEndpoint(w http.ResponseWriter, r *http.Request) {
 		mutex.Lock()
 		players[id] = parsed
 		log.Printf("recv: %s", players)
-		var sending []packet
+		var sending []packet.Packet
 		for v, player := range players {
 			if v != id {
 				sending = append(sending, player)

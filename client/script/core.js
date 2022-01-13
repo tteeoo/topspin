@@ -20,10 +20,10 @@ function update() {
 	area.clear();
 	if (players) {
 		for (var i = 0; i < players.length; i++) {
-			updatePlayer(players[i]);
+			players[i].update(area);
 		}
 	}
-	updatePlayer(p1);
+	p1.update(area);
 }
 
 // Represent the rendering area.
@@ -43,39 +43,6 @@ var area = {
 	}
 } 
 
-// Initialize a player object.
-function player(width, height, color, x, y) {
-	this.width = width;
-	this.height = height;
-	this.x = x;
-	this.y = y;
-	this.color = color
-	this.speedX = 0;
-	this.speedY = 0;
-	this.rotation = 0;
-	this.angvel = Math.PI / 16;
-}
-
-// Advance and draw the given player.
-function updatePlayer(player) {
-	player.x += player.speedX * 4;
-	player.y += player.speedY * 4;
-	ctx = area.context;
-
-	ctx.save();
-	ctx.translate(player.x, player.y);
-	ctx.fillText(name, 0, -player.height)
-	ctx.rotate(player.rotation);
-	ctx.fillStyle = player.color;
-	ctx.fillRect(-player.width/2, -player.height/2, player.width, player.height);
-	ctx.restore();
-
-	player.rotation += player.angvel;
-	if (player.rotation > Math.PI * 2) {
-		player.rotation = player.rotation - Math.PI * 2;
-	}
-}
-
 // Open WebSocket, start game.
 function connect() {
 	ws = new WebSocket("ws://"+server+"/ws", []);
@@ -89,9 +56,10 @@ function connect() {
 			x.style.display = "none";
 		}
 
-		p1 = new player(30, 30, color, 100, 100);
+		p1 = new player(color, 100, 100);
 		window.addEventListener("keydown", onKeyDown, false);
 		window.addEventListener("keyup", onKeyUp, false);
+		window.addEventListener("mousemove", onMouseMove, false);
 		area.init();
 	}
 

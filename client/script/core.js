@@ -1,13 +1,15 @@
 var ws;
 var players = [];
 var p1;
-var server;
-var name;
-var color;
 
 // Run every 15 ms: send player data, draw other players. 
 function update() {
-	ws.send(JSON.stringify(p1));
+	ws.send(JSON.stringify({
+		"type": "Input",
+		"data": {
+			"vel": [p1.speedX, p1.speedY]
+		}
+	}));
 
 	// Handle window resizing.
 	if (document.body.clientWidth != area.canvas.width) {
@@ -44,43 +46,66 @@ var area = {
 } 
 
 // Open WebSocket, start game.
-function connect() {
+function connect(server, name) {
 	ws = new WebSocket("ws://"+server+"/ws", []);
 
+	// Send join request.
 	ws.onopen = function (event) {
-		// show/hide
-		area.canvas.style.display = "block";
-		area.canvas.height = document.body.clientHeight;
-		area.canvas.width = document.body.clientWidth;
-		for (let x of document.getElementsByClassName("toHide")) {
-			x.style.display = "none";
+		"type": "JoinRequest",
+		"data": {
+			"name": name
 		}
-
-		p1 = new player(color, 100, 100);
-		window.addEventListener("keydown", onKeyDown, false);
-		window.addEventListener("keyup", onKeyUp, false);
-		window.addEventListener("mousemove", onMouseMove, false);
-		area.init();
 	}
 
 	ws.onmessage = function (event) {
-		players = JSON.parse(event.data);
+		var packet = JSON.parse(event.data);
+		// Handle different types of packets.
+		switch (packet.type) {
+			case "JoinResponse":
+				if (!packet.data.valid) {
+					// TODO: bad username
+					return
+				}
+
+				// Show/hide join menu.
+				area.canvas.style.display = "block";
+				area.canvas.height = document.body.clientHeight;
+				area.canvas.width = document.body.clientWidth;
+				for (let x of document.getElementsByClassName("toHide")) {
+					x.style.display = "none";
+				}
+
+				// Initialize canvas and event listeners.
+				window.addEventListener("keydown", onKeyDown, false);
+				window.addEventListener("keyup", onKeyUp, false);
+				window.addEventListener("mousemove", onMouseMove, false);
+				area.init();
+				break;
+			case "OtherPlayers":
+				// TODO: add local data
+				players = packet.data.players;
+				break;
+			case "You":
+				p1 = packet.data.player;
+				break;
+			case "DelPlayer":
+				// TODO remove local data
+				break;
+			default:
+				console.log("bad packet", packet.type);
+				break;
+		}
 	}
 }
 
 function join() {
 	var inputs = document.getElementsByClassName("joinInput");
-	server = inputs[0].value;
+	var name = inputs[0].value;
+	var server = inputs[1].value;
 	if (server == "") {
-		server = "mc.theohenson.com:8080";
+		server = "topspin.theohenson.com";
 	}
-	name = inputs[1].value;
-	if (name == "") {
-		name = "Player";
+	if (name.trim() != "") {
+		connect(server, name);
 	}
-	color = inputs[2].value;
-	if (color == "") {
-		color = "black";
-	}
-	connect();
 }

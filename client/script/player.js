@@ -1,12 +1,14 @@
 // This file defines the player object.
 
+// TODO: refactor player
+
 // Initialize a player object.
 function player(color, x, y) {
 
 	this.mass = 40;
+	this.id = 0;
 	this.x = x;
 	this.y = y;
-	this.color = color
 	this.speedX = 0;
 	this.speedY = 0;
 	this.rotation = 0;
@@ -48,7 +50,7 @@ function player(color, x, y) {
 		ctx.translate(this.x, this.y);
 		ctx.fillText(name, 0, -this.height)
 		ctx.rotate(this.rotation);
-		ctx.fillStyle = this.color;
+		ctx.fillStyle = "black";
 		ctx.fillRect(-this.mass/2, -this.mass/2, this.mass, this.mass);
 		ctx.restore();
 

@@ -1,14 +1,14 @@
 package game
 
 type Player struct {
-	id string
-	color string
-	pos [2]float64
-	vel [2]float64
-	angVel float64
-	mass float64
+	Name string `json:"name"`
+	ID int `json:"id"`
+	Pos [2]float64 `json:"pod"`
+	Vel [2]float64 `json:"vel"`
+	AngVel float64 `json:"angVel"`
+	Mass float64 `json:"mass"`
 }
 
-func (p Player) angMom() float64 {
-	return p.angVel * p.mass
+func (p *Player) GetAngMom() float64 {
+	return p.AngVel * p.Mass
 }

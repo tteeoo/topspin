@@ -15,7 +15,7 @@ import (
 
 var addr = flag.String("addr", ":8080", "server address")
 
-var players = map[string]game.Player{}
+var players = make(map[string]*game.Player)
 var incID = 0;
 
 var upgrader = websocket.Upgrader{}
@@ -40,6 +40,7 @@ func wsEndpoint(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	addr := r.RemoteAddr
+	defer delete(players, addr)
 	defer c.Close()
 
 	// Expect join request:
@@ -79,7 +80,7 @@ func wsEndpoint(w http.ResponseWriter, r *http.Request) {
 
 	// Send "you" packet:
 	// Create player
-	players[addr] = game.Player{
+	players[addr] = &game.Player{
 		Name: jrq.Name,
 		ID: incID,
 		Pos: [2]float64{100, 100},
@@ -90,7 +91,7 @@ func wsEndpoint(w http.ResponseWriter, r *http.Request) {
 	incID += 1
 	// Create packet
 	youp := api.You{
-		You: players[addr],
+		You: *players[addr],
 	}
 	b, err = api.ToMarshalledPacket(youp, "You")
 	if err != nil {
@@ -115,6 +116,7 @@ func wsEndpoint(w http.ResponseWriter, r *http.Request) {
 			log.Println("json:", err)
 			break
 		}
+		log.Println(packet)
 		// Parse out payload
 		if packet.Type != "Input" {
 			log.Println("bad packet type:", packet.Type)
@@ -132,6 +134,46 @@ func wsEndpoint(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		// TODO: Calculate pos, send you and players
+		// Calculate pos, send you and players:
+		// Update position
+		players[addr].Pos = [2]float64{
+			players[addr].Pos[0] + (4 * input.Vel[0]),
+			players[addr].Pos[1] + (4 * input.Vel[1]),
+		}
+		// Create you packet
+		youp = api.You{
+			You: *players[addr],
+		}
+		b, err = api.ToMarshalledPacket(youp, "You")
+		if err != nil {
+			log.Println("json:", err)
+		}
+		// Send you packet
+		err = c.WriteMessage(mt, b)
+		if err != nil {
+			log.Println("write:", err)
+		}
+		mutex.Lock()
+		// Create players packet
+		playerMap := make(map[int]game.Player)
+		for key, val := range players {
+			if key != addr {
+				playerMap[val.ID] = *val
+			}
+		}
+		log.Println(playerMap)
+		mutex.Unlock()
+		others := api.OtherPlayers{
+			Players: playerMap,
+		}
+		// Send players packet
+		b, err = api.ToMarshalledPacket(others, "OtherPlayers")
+		if err != nil {
+			log.Println("json:", err)
+		}
+		err = c.WriteMessage(mt, b)
+		if err != nil {
+			log.Println("write:", err)
+		}
 	}
 }

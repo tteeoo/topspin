@@ -1,32 +1,7 @@
 var ws;
 var players = [];
-var p1;
-
-// Run every 15 ms: send player data, draw other players. 
-function update() {
-	ws.send(JSON.stringify({
-		"type": "Input",
-		"data": {
-			"vel": [p1.speedX, p1.speedY]
-		}
-	}));
-
-	// Handle window resizing.
-	if (document.body.clientWidth != area.canvas.width) {
-		area.canvas.width = document.body.clientWidth;
-	}
-	if (document.body.clientHeight != area.canvas.height) {
-		area.canvas.height = document.body.clientHeight;
-	}
-
-	area.clear();
-	if (players) {
-		for (var i = 0; i < players.length; i++) {
-			players[i].update(area);
-		}
-	}
-	p1.update(area);
-}
+var localPlayers = [];
+var me = {p: null, c: null};
 
 // Represent the rendering area.
 var area = {
@@ -45,20 +20,46 @@ var area = {
 	}
 } 
 
+// Run every 15 ms: send player data, draw other players. 
+function update() {
+	ws.send(JSON.stringify({
+		type: "Input",
+		data: "{\"vel\": ["+me.c.speedX+", "+me.c.speedY+"]}"
+	}));
+
+	// Handle window resizing.
+	if (document.body.clientWidth != area.canvas.width) {
+		area.canvas.width = document.body.clientWidth;
+	}
+	if (document.body.clientHeight != area.canvas.height) {
+		area.canvas.height = document.body.clientHeight;
+	}
+
+	area.clear();
+	if (localPlayers) {
+		for (const i in localPlayers) {
+			var p = players[i]
+			localPlayers[i].rotation = drawPlayer(p.pos[0], p.pos[1], localPlayers[i].rotation, p.mass, p.angVel, p.name, "red");
+		}
+	}
+	updateController();
+}
+
 // Open WebSocket, start game.
 function connect(server, name) {
 	ws = new WebSocket("ws://"+server+"/ws", []);
 
 	// Send join request.
 	ws.onopen = function (event) {
-		"type": "JoinRequest",
-		"data": {
-			"name": name
-		}
+		ws.send(JSON.stringify({
+			type: "JoinRequest",
+			data: "{\"name\": \""+name+"\"}"
+		}));
 	}
 
 	ws.onmessage = function (event) {
 		var packet = JSON.parse(event.data);
+		packet.data = JSON.parse(packet.data);
 		// Handle different types of packets.
 		switch (packet.type) {
 			case "JoinResponse":
@@ -82,11 +83,18 @@ function connect(server, name) {
 				area.init();
 				break;
 			case "OtherPlayers":
-				// TODO: add local data
 				players = packet.data.players;
+				for (const id in players) {
+					if (!(id in localPlayers)) {
+						localPlayers[id] = new localPlayer();
+					}
+				}
 				break;
 			case "You":
-				p1 = packet.data.player;
+				me.p = packet.data.you;
+				if (me.c === null) {
+					me.c = new controller();
+				}
 				break;
 			case "DelPlayer":
 				// TODO remove local data

@@ -15,7 +15,7 @@ type JoinResponse struct {
 }
 
 type OtherPlayers struct {
-	Players []game.Player `json:"players"`
+	Players map[int]game.Player `json:"players"`
 }
 
 type You struct {
@@ -31,7 +31,7 @@ type JoinRequest struct {
 }
 
 type Input struct {
-	Vel [2]int `json:"vel"`
+	Vel [2]float64 `json:"vel"`
 }
 
 func ToMarshalledPacket(payload interface{}, typeString string) ([]byte, error) {

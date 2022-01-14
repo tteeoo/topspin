@@ -2,61 +2,59 @@
 
 // TODO: refactor player
 
-// Initialize a player object.
-function player(color, x, y) {
-
-	this.mass = 40;
-	this.id = 0;
-	this.x = x;
-	this.y = y;
-	this.speedX = 0;
-	this.speedY = 0;
+// Initialize a localController object.
+function localPlayer(remotePlayerID) {
 	this.rotation = 0;
-	this.angvel = Math.PI / 16;
+}
+
+function controller() {
+	this.rotation = 0;
 	this.targetX = 0;
 	this.targetY = 0;
+	this.speedX = 0;
+	this.speedY = 0;
 	this.followMouse = false;
+}
 
-	// Advance and draw the given player.
-	// Take the area to draw on as an argument.
-	this.update = function(area) {
-		// Stop if following mouse and at cursor.
-		if (this.followMouse) {
-			if (this.speedX > 0) {
-				if (this.x + this.speedX * 4 >= this.targetX) {
-					this.speedX = 0;
-				}
-			} else {
-				if (this.x + this.speedX * 4 <= this.targetX) {
-					this.speedX = 0;
-				}
+function updateController() {
+	// Stop if following mouse and at cursor.
+	if (me.c.followMouse) {
+		if (me.c.speedX > 0) {
+			if (me.p.pos[0] + me.c.speedX * 4 >= me.c.targetX) {
+				me.c.speedX = 0;
 			}
-			if (this.speedY > 0) {
-				if (this.y + this.speedY * 4 >= this.targetY) {
-					this.speedY = 0;
-				}
-			} else {
-				if (this.y + this.speedY * 4 <= this.targetY) {
-					this.speedY = 0;
-				}
+		} else {
+			if (me.p.pos[0] + me.c.speedX * 4 <= me.c.targetX) {
+				me.c.speedX = 0;
 			}
 		}
-		this.x += this.speedX * 4;
-		this.y += this.speedY * 4;
-
-		var ctx = area.context;
-
-		ctx.save();
-		ctx.translate(this.x, this.y);
-		ctx.fillText(name, 0, -this.height)
-		ctx.rotate(this.rotation);
-		ctx.fillStyle = "black";
-		ctx.fillRect(-this.mass/2, -this.mass/2, this.mass, this.mass);
-		ctx.restore();
-
-		this.rotation += this.angvel;
-		if (this.rotation > Math.PI * 2) {
-			this.rotation = this.rotation - Math.PI * 2;
+		if (me.c.speedY > 0) {
+			if (me.p.pos[1] + me.c.speedY * 4 >= me.c.targetY) {
+				me.c.speedY = 0;
+			}
+		} else {
+			if (me.p.pos[1] + me.c.speedY * 4 <= me.c.targetY) {
+				me.c.speedY = 0;
+			}
 		}
 	}
+
+	me.c.rotation = drawPlayer(me.p.pos[0], me.p.pos[1], me.c.rotation, me.p.mass, me.p.angVel, me.p.name, "black");
+}
+
+function drawPlayer(x, y, rotation, mass, angVel, name, color) {
+	var ctx = area.context;
+	ctx.save();
+	ctx.translate(x, y);
+	ctx.fillText(name, 0, -mass)
+	ctx.rotate(rotation);
+	ctx.fillStyle = color;
+	ctx.fillRect(-mass/2, -mass/2, mass, mass);
+	ctx.restore();
+
+	rotation += angVel;
+	if (rotation > Math.PI * 2) {
+		rotation = rotation - Math.PI * 2;
+	}
+	return rotation;
 }

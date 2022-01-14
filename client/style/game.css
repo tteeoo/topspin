@@ -8,6 +8,11 @@ html, body {
 	overflow: hidden;
 }
 
+a {
+	color: black;
+	text-align: center;
+}
+
 #joinBox {
 	padding: 16px;
 	margin: 48px auto;

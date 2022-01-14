@@ -77,6 +77,7 @@ func wsEndpoint(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Println("write:", err)
 	}
+	log.Println(incID, addr)
 
 	// Send "you" packet:
 	// Create player
@@ -116,7 +117,6 @@ func wsEndpoint(w http.ResponseWriter, r *http.Request) {
 			log.Println("json:", err)
 			break
 		}
-		log.Println(packet)
 		// Parse out payload
 		if packet.Type != "Input" {
 			log.Println("bad packet type:", packet.Type)
@@ -161,7 +161,6 @@ func wsEndpoint(w http.ResponseWriter, r *http.Request) {
 				playerMap[val.ID] = *val
 			}
 		}
-		log.Println(playerMap)
 		mutex.Unlock()
 		others := api.OtherPlayers{
 			Players: playerMap,

@@ -47,7 +47,7 @@ function update() {
 
 // Open WebSocket, start game.
 function connect(server, name) {
-	ws = new WebSocket("wss://"+server+"/ws", []);
+	ws = new WebSocket("ws://"+server+"/ws", []);
 
 	// Send join request.
 	ws.onopen = function (event) {

@@ -29,8 +29,7 @@ func main() {
 		http.ServeFile(w, r, path.Join("./client/", r.URL.Path))
 	})
 	upgrader.CheckOrigin = func(r *http.Request) bool { return true }
-	// TODO: get cert and key from flag
-	log.Fatal(http.ListenAndServeTLS(*addr, "cert", "key", nil))
+	log.Fatal(http.ListenAndServe(*addr, nil))
 }
 
 func wsEndpoint(w http.ResponseWriter, r *http.Request) {

@@ -1,30 +1,7 @@
 var ws;
 var players = [];
-var p1;
-var server;
-var name;
-var color;
-
-// Run every 15 ms: send player data, draw other players. 
-function update() {
-	ws.send(JSON.stringify(p1));
-
-	// Handle window resizing.
-	if (document.body.clientWidth != area.canvas.width) {
-		area.canvas.width = document.body.clientWidth;
-	}
-	if (document.body.clientHeight != area.canvas.height) {
-		area.canvas.height = document.body.clientHeight;
-	}
-
-	area.clear();
-	if (players) {
-		for (var i = 0; i < players.length; i++) {
-			players[i].update(area);
-		}
-	}
-	p1.update(area);
-}
+var localPlayers = [];
+var me = {p: null, c: null};
 
 // Represent the rendering area.
 var area = {
@@ -43,44 +20,100 @@ var area = {
 	}
 } 
 
+// Run every 15 ms: send player data, draw other players. 
+function update() {
+	ws.send(JSON.stringify({
+		type: "Input",
+		data: "{\"vel\": ["+me.c.speedX+", "+me.c.speedY+"]}"
+	}));
+
+	// Handle window resizing.
+	if (document.body.clientWidth != area.canvas.width) {
+		area.canvas.width = document.body.clientWidth;
+	}
+	if (document.body.clientHeight != area.canvas.height) {
+		area.canvas.height = document.body.clientHeight;
+	}
+
+	area.clear();
+	if (localPlayers) {
+		for (const i in localPlayers) {
+			var p = players[i]
+			localPlayers[i].rotation = drawPlayer(p.pos[0], p.pos[1], localPlayers[i].rotation, p.mass, p.angVel, p.name, "red");
+		}
+	}
+	updateController();
+}
+
 // Open WebSocket, start game.
-function connect() {
+function connect(server, name) {
 	ws = new WebSocket("ws://"+server+"/ws", []);
 
+	// Send join request.
 	ws.onopen = function (event) {
-		// show/hide
-		area.canvas.style.display = "block";
-		area.canvas.height = document.body.clientHeight;
-		area.canvas.width = document.body.clientWidth;
-		for (let x of document.getElementsByClassName("toHide")) {
-			x.style.display = "none";
-		}
-
-		p1 = new player(color, 100, 100);
-		window.addEventListener("keydown", onKeyDown, false);
-		window.addEventListener("keyup", onKeyUp, false);
-		window.addEventListener("mousemove", onMouseMove, false);
-		area.init();
+		ws.send(JSON.stringify({
+			type: "JoinRequest",
+			data: "{\"name\": \""+name+"\"}"
+		}));
 	}
 
 	ws.onmessage = function (event) {
-		players = JSON.parse(event.data);
+		var packet = JSON.parse(event.data);
+		packet.data = JSON.parse(packet.data);
+		// Handle different types of packets.
+		switch (packet.type) {
+			case "JoinResponse":
+				if (!packet.data.valid) {
+					// TODO: bad username
+					return
+				}
+
+				// Show/hide join menu.
+				area.canvas.style.display = "block";
+				area.canvas.height = document.body.clientHeight;
+				area.canvas.width = document.body.clientWidth;
+				for (let x of document.getElementsByClassName("toHide")) {
+					x.style.display = "none";
+				}
+
+				// Initialize canvas and event listeners.
+				window.addEventListener("keydown", onKeyDown, false);
+				window.addEventListener("keyup", onKeyUp, false);
+				window.addEventListener("mousemove", onMouseMove, false);
+				area.init();
+				break;
+			case "OtherPlayers":
+				players = packet.data.players;
+				for (const id in players) {
+					if (!(id in localPlayers)) {
+						localPlayers[id] = new localPlayer();
+					}
+				}
+				break;
+			case "You":
+				me.p = packet.data.you;
+				if (me.c === null) {
+					me.c = new controller();
+				}
+				break;
+			case "DelPlayer":
+				// TODO remove local data
+				break;
+			default:
+				console.log("bad packet", packet.type);
+				break;
+		}
 	}
 }
 
 function join() {
 	var inputs = document.getElementsByClassName("joinInput");
-	server = inputs[0].value;
+	var name = inputs[0].value;
+	var server = inputs[1].value;
 	if (server == "") {
-		server = "mc.theohenson.com:8080";
+		server = "topspin.theohenson.com";
 	}
-	name = inputs[1].value;
-	if (name == "") {
-		name = "Player";
+	if (name.trim() != "") {
+		connect(server, name);
 	}
-	color = inputs[2].value;
-	if (color == "") {
-		color = "black";
-	}
-	connect();
 }

@@ -38,8 +38,10 @@ function update() {
 	area.clear();
 	if (localPlayers) {
 		for (const i in localPlayers) {
-			var p = players[i]
-			localPlayers[i].rotation = drawPlayer(p.pos[0], p.pos[1], localPlayers[i].rotation, p.mass, p.angVel, p.name, "red");
+			if (i in players) {
+				var p = players[i]
+				localPlayers[i].rotation = drawPlayer(p.pos[0], p.pos[1], localPlayers[i].rotation, p.mass, p.angVel, p.name, "red");
+			}
 		}
 	}
 	updateController();

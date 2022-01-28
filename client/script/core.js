@@ -81,7 +81,6 @@ function connect(server, name) {
 				// Initialize canvas and event listeners.
 				window.addEventListener("keydown", onKeyDown, false);
 				window.addEventListener("keyup", onKeyUp, false);
-				window.addEventListener("mousemove", onMouseMove, false);
 				area.init();
 				break;
 			case "OtherPlayers":

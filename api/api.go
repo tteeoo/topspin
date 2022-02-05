@@ -22,10 +22,6 @@ type You struct {
 	You game.Player `json:"you"`
 }
 
-type DelPlayer struct {
-	ID string `json:"id"`
-}
-
 type JoinRequest struct {
 	Name string `json:"name"`
 }

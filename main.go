@@ -6,7 +6,6 @@ import (
 	"log"
 	"net/http"
 	"path"
-	"sync"
 
 	"github.com/gorilla/websocket"
 	"github.com/tteeoo/topspin/api"
@@ -19,7 +18,6 @@ var players = make(map[string]*game.Player)
 var incID = 0;
 
 var upgrader = websocket.Upgrader{}
-var mutex = &sync.Mutex{}
 
 func main() {
 	flag.Parse()
@@ -153,7 +151,6 @@ func wsEndpoint(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			log.Println("write:", err)
 		}
-		mutex.Lock()
 		// Create players packet
 		playerMap := make(map[int]game.Player)
 		for key, val := range players {
@@ -161,7 +158,6 @@ func wsEndpoint(w http.ResponseWriter, r *http.Request) {
 				playerMap[val.ID] = *val
 			}
 		}
-		mutex.Unlock()
 		others := api.OtherPlayers{
 			Players: playerMap,
 		}

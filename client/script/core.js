@@ -1,6 +1,7 @@
 var ws;
 var players = [];
 var localPlayers = [];
+var toDelete = [];
 var me = {p: null, c: null};
 
 // Represent the rendering area.
@@ -41,15 +42,25 @@ function update() {
 			if (i in players) {
 				var p = players[i]
 				localPlayers[i].rotation = drawPlayer(p.pos[0], p.pos[1], localPlayers[i].rotation, p.mass, p.angVel, p.name, "red");
+			} else {
+				toDelete.push(i);
 			}
 		}
+		for (const i in toDelete) {
+			delete localPlayers[toDelete[i]];
+		}
+		toDelete = [];
 	}
 	updateController();
 }
 
 // Open WebSocket, start game.
 function connect(server, name) {
-	ws = new WebSocket("wss://"+server+"/ws", []);
+	if (server == "localhost:8080") {
+		ws = new WebSocket("ws://"+server+"/ws", []);
+	} else {
+		ws = new WebSocket("wss://"+server+"/ws", []);
+	}
 
 	// Send join request.
 	ws.onopen = function (event) {
@@ -96,9 +107,6 @@ function connect(server, name) {
 				if (me.c === null) {
 					me.c = new controller();
 				}
-				break;
-			case "DelPlayer":
-				// TODO remove local data
 				break;
 			default:
 				console.log("bad packet", packet.type);

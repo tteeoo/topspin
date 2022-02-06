@@ -19,6 +19,7 @@ function drawPlayer(x, y, rotation, mass, angVel, name, color) {
 	var ctx = area.context;
 	ctx.save();
 	ctx.translate(x, y);
+	ctx.textAlign = "center";
 	ctx.fillText(name, 0, -mass)
 	ctx.rotate(rotation);
 	ctx.fillStyle = color;

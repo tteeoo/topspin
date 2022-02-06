@@ -12,7 +12,6 @@ var area = {
 		this.canvas.height = document.body.clientHeight;
 		this.context = this.canvas.getContext("2d");
 		this.context.font = "10px monospace";
-		this.context.textAlign = "center";
 		this.interval = setInterval(update, 15);
 		document.body.insertBefore(this.canvas, document.body.childNodes[0]);
 	},

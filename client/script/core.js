@@ -11,7 +11,7 @@ var area = {
 		this.canvas.width = document.body.clientWidth;
 		this.canvas.height = document.body.clientHeight;
 		this.context = this.canvas.getContext("2d");
-		this.context.font = "12px Arial";
+		this.context.font = "10px monospace";
 		this.context.textAlign = "center";
 		this.interval = setInterval(update, 15);
 		document.body.insertBefore(this.canvas, document.body.childNodes[0]);
@@ -37,6 +37,14 @@ function update() {
 	}
 
 	area.clear();
+	var ctx = area.context;
+	ctx.save()
+	ctx.textAlign = "start";
+	ctx.font = "14px monospace";
+	ctx.fillText("mass = " + me.p.mass, 4, 14);
+	ctx.fillText("angular velocity = " + me.p.angVel, 4, 28);
+	ctx.restore()
+
 	if (localPlayers) {
 		for (const i in localPlayers) {
 			if (i in players) {

@@ -79,13 +79,52 @@ func wsEndpoint(w http.ResponseWriter, r *http.Request) {
 
 	// Send "you" packet:
 	// Create player
-	players[addr] = &game.Player{
-		Name: jrq.Name,
-		ID: incID,
-		Pos: [2]float64{100, 100},
-		Vel: [2]float64{0, 0},
-		AngVel: 0.2,
-		Mass: 40,
+	switch jrq.Name {
+	case "big":
+		players[addr] = &game.Player{
+			Name: jrq.Name,
+			ID: incID,
+			Pos: [2]float64{100, 100},
+			Vel: [2]float64{0, 0},
+			AngVel: 0.2,
+			Mass: 60,
+		}
+	case "spin":
+		players[addr] = &game.Player{
+			Name: jrq.Name,
+			ID: incID,
+			Pos: [2]float64{100, 100},
+			Vel: [2]float64{0, 0},
+			AngVel: 0.5,
+			Mass: 40,
+		}
+	case "small":
+		players[addr] = &game.Player{
+			Name: jrq.Name,
+			ID: incID,
+			Pos: [2]float64{100, 100},
+			Vel: [2]float64{0, 0},
+			AngVel: 0.2,
+			Mass: 20,
+		}
+	case "nospin":
+		players[addr] = &game.Player{
+			Name: jrq.Name,
+			ID: incID,
+			Pos: [2]float64{100, 100},
+			Vel: [2]float64{0, 0},
+			AngVel: 0,
+			Mass: 40,
+		}
+	default:
+		players[addr] = &game.Player{
+			Name: jrq.Name,
+			ID: incID,
+			Pos: [2]float64{100, 100},
+			Vel: [2]float64{0, 0},
+			AngVel: 0.2,
+			Mass: 40,
+		}
 	}
 	incID += 1
 	// Create packet
